@@ -15,7 +15,7 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 		<http:listener doc:name="Listener" doc:id="499e5c41-89f3-4225-8292-8e9adc1dcf38" config-ref="HTTP_Listener_config" path="error">
 		</http:listener>
 		<set-payload value='#["payload in the listener with 500 status code"]' doc:name="Set Payload" doc:id="0f1c805c-a35b-439d-b7c5-6afc621d55a3" />
-		<until-successful maxRetries="5" doc:name="Until Successful" doc:id="1c663224-044c-4b40-b6b7-c3f1ddb6df33" millisBetweenRetries="600">
+		<until-successful maxRetries="3" doc:name="Until Successful" doc:id="1c663224-044c-4b40-b6b7-c3f1ddb6df33" millisBetweenRetries="600">
 			<http:request method="POST" doc:name="Request" doc:id="212a850a-0dc6-4c18-a8f3-2a453fb332a3" config-ref="HTTP_Request_configuration" url="https://www.youtube.com/watch?v=a86tdUBu9lQ&amp;list=PL61bQcdxsK6_1tb0BbAtAOX_SdtvgQlxV&amp;index=9">
 		</http:request>
 		</until-successful>
@@ -52,7 +52,8 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 		<logger level="INFO" doc:name="Logger" doc:id="8bba0075-4950-4811-9f29-dc49b29eabe9" message='#["logger"]'/>
 		<error-handler>
 			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="f3b5c570-fec3-4107-a91b-aa03664c5495" type="HTTP:INTERNAL_SERVER_ERROR">
-				<set-payload value='#["in 1stflow EH"]' doc:name="in 1stflow EH" doc:id="19f1ab53-502c-410d-a361-467af96a76ea" />
+				<set-payload value='#["in 1stflow Error handling"]' doc:name="in 1stflow EH" doc:id="19f1ab53-502c-410d-a361-467af96a76ea" />
+				<logger level="INFO" doc:name="Logger" doc:id="208d5c96-9e45-49a2-bde4-0f39279d0981" message="#[payload]"/>
 			</on-error-propagate>
 		</error-handler>
 	</flow>
