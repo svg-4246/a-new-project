@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="69fb91ba-6c08-4bee-82cf-e44548d01f00" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="a2429840-f9d8-4f5e-bf16-170e2e28db9f" />
+	<http:request-config name="HTTP_Request_configuration1" doc:name="HTTP Request configuration" doc:id="e50a85ee-f286-4d33-91fc-26a236207901" />
+	<configuration doc:name="Configuration" doc:id="1795a99e-5103-494b-b8bf-2efa6acc2237" defaultErrorHandler-ref="GEH-1" />
+	<flow name="error-OEP-Connectivity" doc:id="31e5ecf0-5868-4b69-b215-566d04f5cb0c" >
+		<http:listener doc:name="Listener" doc:id="499e5c41-89f3-4225-8292-8e9adc1dcf38" config-ref="HTTP_Listener_config" path="error">
+		</http:listener>
+		<set-payload value='#["payload in the listener with 500 status code"]' doc:name="Set Payload" doc:id="0f1c805c-a35b-439d-b7c5-6afc621d55a3" />
+		<until-successful maxRetries="5" doc:name="Until Successful" doc:id="1c663224-044c-4b40-b6b7-c3f1ddb6df33" millisBetweenRetries="600">
+			<http:request method="POST" doc:name="Request" doc:id="212a850a-0dc6-4c18-a8f3-2a453fb332a3" config-ref="HTTP_Request_configuration" url="https://www.youtube.com/watch?v=a86tdUBu9lQ&amp;list=PL61bQcdxsK6_1tb0BbAtAOX_SdtvgQlxV&amp;index=9">
+		</http:request>
+		</until-successful>
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="086f096b-cb92-4cec-b5e8-fbea87223977" type="HTTP:BAD_GATEWAY, HTTP:BAD_REQUEST, HTTP:CLIENT_SECURITY, HTTP:CONNECTIVITY, HTTP:FORBIDDEN, HTTP:INTERNAL_SERVER_ERROR, HTTP:METHOD_NOT_ALLOWED, HTTP:NOT_ACCEPTABLE, HTTP:NOT_FOUND, HTTP:PARSING, HTTP:RETRY_EXHAUSTED, HTTP:SECURITY, HTTP:SERVICE_UNAVAILABLE, HTTP:TIMEOUT, HTTP:TOO_MANY_REQUESTS, HTTP:UNAUTHORIZED, HTTP:UNSUPPORTED_MEDIA_TYPE, EXPRESSION, STREAM_MAXIMUM_SIZE_EXCEEDED">
+				<set-payload value='#["ep"]' doc:name="ep" doc:id="06686003-85ed-46e2-be35-9dd81aded669" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	<flow name="error-OEC-NOconnectivity" doc:id="5e5bf591-e51a-4787-a904-3ffb83dad43a" >
+		<http:listener doc:name="Listener" doc:id="ccedddfa-da8d-4999-929a-f892f8a1d0f2" config-ref="HTTP_Listener_config" path="oec">
+		</http:listener>
+		<set-payload doc:name="IN Set Payload" doc:id="28b4fd1a-2c67-40c0-931a-6d2595050231" value='#["in setpayload "]'/>
+		<http:request method="POST" doc:name="Request" doc:id="28a4876f-f1de-41e7-bfce-709a5e37d70b" config-ref="HTTP_Request_configuration" url="https://www.youtube.com/watch?v=a86tdUBu9lQ&amp;list=PL61bQcdxsK6_1tb0BbAtAOX_SdtvgQlxV&amp;index=9"/>
+		<logger level="INFO" doc:name="Logger" doc:id="57e3dfcc-0be7-4de0-9cab-6fa93fe03755" message='"in oec"'/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="6b6045f5-79b6-4036-bd4d-6022dda7c8b4" type="HTTP:FORBIDDEN">
+				<set-payload value='#["OEP 500"]' doc:name="OEP 500" doc:id="f254afbd-8aa2-4ba4-a1ed-121834729604" />
+			</on-error-propagate>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="365816eb-a8cd-4814-9218-4cb1f2564fe8" type="ANY">
+				<set-payload value='#["status with 200 code"]' doc:name="OEC" doc:id="88a726a2-c76a-49cd-b0e1-b97b769bdfce" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	<flow name="error-with-flowref" doc:id="2ef02ca8-b469-432f-a60c-4c2bb7c522a0" >
+		<http:listener doc:name="Listener" doc:id="24e23611-6b1a-4706-89c5-f2d96b860eb7" config-ref="HTTP_Listener_config" path="efw">
+			<http:error-response >
+				<http:body ><![CDATA[#[payload]]]></http:body>
+			</http:error-response>
+		</http:listener>
+		<set-payload value='#["before flow ref"]' doc:name="before flow ref" doc:id="d4f330a3-30b5-48bf-9938-8d3879843b83" />
+		<flow-ref doc:name="Flow Reference" doc:id="eda897da-7dea-4d21-972a-b5c7ad933c80" name="errorfw1"/>
+		<set-payload value='#["after fw"]' doc:name="after fw " doc:id="d89a8d92-a293-4ce3-bb37-48b1ed5a87eb" />
+		<logger level="INFO" doc:name="Logger" doc:id="8bba0075-4950-4811-9f29-dc49b29eabe9" message='#["logger"]'/>
+		<error-handler>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="f3b5c570-fec3-4107-a91b-aa03664c5495" type="HTTP:INTERNAL_SERVER_ERROR">
+				<set-payload value='#["in 1stflow EH"]' doc:name="in 1stflow EH" doc:id="19f1ab53-502c-410d-a361-467af96a76ea" />
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="errorfw1" doc:id="d02fe1f5-a834-4486-be90-51efe7f0f5dd">
+		<try doc:name="Try" doc:id="d5fa43d0-8b9e-46fd-b293-703293dcad7e" >
+			<http:request method="POST" doc:name="Request" doc:id="9bf6b07b-146c-405c-8298-fc0ff4087e7f" config-ref="HTTP_Request_configuration" url="https://www.youtube.com/watch?v=a86tdUBu9lQ&amp;list=PL61bQcdxsK6_1tb0BbAtAOX_SdtvgQlxV&amp;index=9" />
+		</try>
+		<set-payload value='#["in 2nd flow"]' doc:name="in 2nd flow" doc:id="7e5fe565-2301-4844-a21d-24e843afdcd7" />
+		<error-handler>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="f4b245f4-2ddf-4d7c-9ae8-86e9b1b5a6ec" >
+				<set-payload value='#["in 2nd flow EH"]' doc:name="in 2nd flow EH" doc:id="9ee0ef90-9c16-49e1-8f90-53c442f11b09" />
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+</mule>

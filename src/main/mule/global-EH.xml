@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<error-handler name="GEH-1" doc:id="a85ba7ff-f52a-4f0b-b210-baaf0389dc8f" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="50cdec74-a545-4771-83ba-224cbb5814bb" >
+			<set-payload value='#["Global Error Handler P"]' doc:name='"Global Error Handler P"' doc:id="72b0ce5c-298f-41f0-98de-fb74d2e6f6b7" />
+		</on-error-propagate>
+	</error-handler>
+	<error-handler name="GEH-2" doc:id="5d094122-df6f-4711-b69c-68c6b01d2c28" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="4bcd9500-826f-4f7b-927a-d534eaf4184f" type="ANY">
+			<set-payload value='#["GEH2 P"]' doc:name="Set Payload" doc:id="7e629e97-3022-4564-95e2-b6210858643c" />
+		</on-error-propagate>
+	</error-handler>
+</mule>

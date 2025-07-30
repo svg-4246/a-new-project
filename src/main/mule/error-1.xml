@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="error-1Flow" doc:id="09de5b03-7d49-4c1e-84bd-ca68b308b4a8" >
+		<http:listener doc:name="Listener" doc:id="476179a7-4b1d-4ff1-8e24-cf7fff73a5b8" config-ref="HTTP_Listener_config" path="re"/>
+		<choice doc:name="Choice" doc:id="84bf3bae-7a41-4c0e-b32b-92651d0f6da0">
+			<when expression="#[isEmpty(payload)]">
+				<set-payload value='#["get out"]' doc:name='"get out"' doc:id="5d658adf-e263-4a57-8ef4-3e26eeb92060" />
+			</when>
+			<otherwise >
+				<set-payload value="#[payload]" doc:name="Set Payload" doc:id="8c2f7e48-aa63-4735-8f9f-f3fcef42bdf0" />
+				<raise-error doc:name="Raise error" doc:id="e15d213a-c71a-4192-ae75-92f57953de99" type="TRUE:ONE" description="the payload is not there" />
+			</otherwise>
+		</choice>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="4c2c39a6-cce4-4cb8-a05e-6af340588662" type="TRUE:ONE">
+				<set-payload value='#[error.description]' doc:name='"on error continue"' doc:id="49969b65-c217-4e6d-8042-8ca61be0d3d3" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	<flow name="flow" doc:id="305e20f8-4ddd-4711-9162-d39fd4ee2a6b" >
+		<http:listener doc:name="Listener" doc:id="4b29b621-c646-4147-ad14-6980b895cae1" config-ref="HTTP_Listener_config" path="cnclvl">
+			<http:error-response >
+				<http:body ><![CDATA[#[payload]]]></http:body>
+			</http:error-response>
+		</http:listener>
+		<set-payload value='#["before payload"]' doc:name="before payload" doc:id="ba845d73-279f-4b4c-94c9-092496edc28c" />
+		<flow-ref doc:name="Flow Reference" doc:id="723b8569-2ca5-47c5-95e0-8a35cb1c1a9d" name="flow1"/>
+		<set-payload value='#["result"]' doc:name="result" doc:id="fc650c72-8cc1-4f96-96ff-60a46aa59873" />
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="b70b5bc6-078f-4cc8-a496-e44042f7ddc4" type="ANY">
+				<set-payload value='#["1st flow ehc"]' doc:name='"1st flow ehc"' doc:id="d9d9c008-bee3-4b93-8ed4-37cfdc344ce1" />
+			</on-error-continue>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="b98974f2-6bd6-4cc8-81fa-11abd8330ad5" type="ANY">
+				<set-payload value='#["1st flow ehp"]' doc:name='"1st flow ehp"' doc:id="2f5b0ea9-4df7-46d6-aae4-b1cf065261c8" />
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="flow1" doc:id="2daf904f-18f9-432f-8750-0793489d9fad" >
+		<try doc:name="Try" doc:id="e466d9fb-2db6-4688-80fe-e2ae12627ff1" >
+			<http:request method="POST" doc:name="Request" doc:id="4b351467-d3ff-4671-826f-255344277e2a" url="https://www.youtube.com/watch?v=a86tdUBu9lQ&amp;list=PL61bQcdxsK6_1tb0BbAtAOX_SdtvgQlxV&amp;index=9" />
+			<error-handler >
+				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="cf60e6f1-4dda-4395-b2c1-a631522a3de9" type="ANY">
+					<set-payload value='#["try propagate"]' doc:name="try propagate" doc:id="33000fd2-1195-465a-a1de-14016a169814" />
+				</on-error-propagate>
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="398b21f5-03ff-4067-89fa-c151ac135f00">
+					<set-payload value='#["EXECUIT THIS TRY ONCE"]' doc:name="EXECUIT THIS TRY ONCE" doc:id="3c928035-eafc-4b0c-af7a-0553ef9941ad" />
+				</on-error-continue>
+			</error-handler>
+		</try>
+		<set-payload value='#["in 2nd flow connector"]' doc:name="in 2nd flow connector" doc:id="7752d1ba-6164-4261-af09-48ed8cc447d4" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="a742467e-72e3-4ddf-af86-4b019b86d7b1" type="ANY">
+				<set-payload value='#["2nd flow eh"]' doc:name="2nd flow eh" doc:id="ab1481e4-e6f4-4f96-a7d3-5dad1246373a" />
+			</on-error-propagate>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="88c5edf7-cac2-4d68-87b4-525e8a138a00" type="ANY">
+				<set-payload value='#["2nd flow ehc"]' doc:name="2nd flow ehc" doc:id="386aeafd-1d6e-48d0-8df8-1fb83f7064cd" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+</mule>
